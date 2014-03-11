@@ -56,9 +56,13 @@ fi
 
 # If TARGET_PATH not specified, set it to user's home folder
 if [ "${TARGET_PATH}" == "" ]; then
-    SERVER_USER="${SERVER_META#*\ }"
-    SERVER_USER="${SERVER_USER%@*}"
-    TARGET_PATH="/home/${SERVER_USER}/"
+    SERVER_USER_PORT="${SERVER_META#*\ }"
+    SERVER_USER="${SERVER_USER_PORT%@*}"
+    if [ "${SERVER_USER}" == "root" ]; then
+        TARGET_PATH="/root/"
+    else
+        TARGET_PATH="/home/${SERVER_USER}/"
+    fi
 fi
 
 # If TARGET_PATH is not end with a '/', attach one
