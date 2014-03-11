@@ -3,9 +3,9 @@
 function usage()
 {
 cat << EOUSAGE
-Usage: ssh-target list
-       ssh-target add NICK_NAME USER IP [PORT]
-       ssh-target del NICK_NAME
+Usage: ssh-server list
+       ssh-server add NICK_NAME USER IP [PORT]
+       ssh-server del NICK_NAME
 EOUSAGE
 }
 
