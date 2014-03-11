@@ -2,11 +2,13 @@ ssh-server-manager
 ==================
 
 Ever you tied up with keep in mind the messy server IP/hostname which have different user name to login and even some of them are using special port number (not standard 22) ?<br>
-ssh-server manager is a bundle of scripts help to simplify those login information (IP/hostname, user, port) into short and esay-to-modify nicknames.
+SSH Server Manager is a bundle of scripts help to simplify those login information (IP/hostname, user, port) into short and esay-to-modify nicknames.
 
 You'll definitely like this convenient way to login to servers and transfer files from/to them, if given tens or hundreds of servers to maintain with.
 
-Try it out by using "ssh-server add" to add a server info, then use "ssh-to" to access it.
+Try it out by using "ssh-server add" to add a server info, then use "ssh-to" to access it, e.g.<br>
+> ssh-server add micky root 10.0.1.1<br>
+> ssh-to micky
 
  - ssh-server <br>manager the login information
 <pre>
