@@ -24,3 +24,17 @@ function getServerMeta
     echo "${SERVER_META}"
 }
 
+function isNameExist
+{
+    THIS_FOLDER=${1#d}
+    SERVER_NAME=${2#n}
+    IP_MAP_FILE="${THIS_FOLDER}/func/name-to-ip.list"
+
+    RES=`grep "SERVER_${SERVER_NAME}_IP" "${IP_MAP_FILE}"`
+    if [ "${RES}" != "" ]; then
+        echo "true"
+    else
+        echo "false"
+    fi
+}
+

@@ -11,6 +11,7 @@ EOUSAGE
 
 # Name-to-ip mapping file
 THIS_FOLDER="${0%/*}"
+source "${THIS_FOLDER}/func/utility.func"
 IP_MAP_FILE="${THIS_FOLDER}/func/name-to-ip.list"
 
 # Add a server into server mapping file
@@ -30,8 +31,7 @@ function ssh-target-add
     declare -i EXIST=0
 
     # Check if record aleady exist
-    RES=`grep "SERVER_${SERVER_NAME}_IP" "${IP_MAP_FILE}"`
-    if [ "${RES}" != "" ]; then
+    if [ $(isNameExist "d${THIS_FOLDER}" "n${SERVER_NAME}") == "true" ]; then
         EXIST=1
         sed -i "/SERVER_${SERVER_NAME}_IP/d" "${IP_MAP_FILE}"
     fi
@@ -40,8 +40,7 @@ function ssh-target-add
     sed -i '/BEGIN_OF_IP_LIST/a'"SERVER_${SERVER_NAME}_IP=\"${SERVER_PORT} ${SERVER_USER}@${SERVER_IP}\"" "${IP_MAP_FILE}"
 
     # Check result
-    RES=`grep "SERVER_${SERVER_NAME}_IP" "${IP_MAP_FILE}" | grep "${SERVER_IP}"`
-    if [ "${RES}" == "" ]; then
+    if [ $(isNameExist "d${THIS_FOLDER}" "n${SERVER_NAME}") == "false" ]; then
         echo "[Error] Server add failed!"
     elif [ ${EXIST} -eq 1 ]; then
         echo "[Done] Server ${SERVER_NAME} modified => [${SERVER_USER}] ${SERVER_IP} : ${SERVER_PORT} succeeful."
@@ -60,15 +59,13 @@ function ssh-target-remove
     SERVER_NAME=${1}
 
     # check if record exist
-    RES=`grep "SERVER_${SERVER_NAME}_IP" "${IP_MAP_FILE}"`
-    if [ "${RES}" == "" ]; then
+    if [ $(isNameExist "d${THIS_FOLDER}" "n${SERVER_NAME}") == "false" ]; then
         echo "[INFO] Server ${SERVER_NAME} not exist."
     else
         # remove record
         sed -i "/SERVER_${SERVER_NAME}_IP/d" "${IP_MAP_FILE}"
         # check result
-        RES=`grep "SERVER_${SERVER_NAME}_IP" "${IP_MAP_FILE}"`
-        if [ "${RES}" == "" ]; then
+        if [ $(isNameExist "d${THIS_FOLDER}" "n${SERVER_NAME}") == "false" ]; then
             echo "[Done] Server ${SERVER_NAME} removed successful."
         else
             echo "[ERROR] Server remove failed!"
