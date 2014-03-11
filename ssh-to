@@ -3,9 +3,14 @@
 function usage()
 {
     cat << EOUSAGE
-Usage: ssh-to [options] NICK_NAME
+Usage: ssh-to [options] SERVER_NAME [ssh parameters]
+Options:
        -u USER: specify server user
        -p PORT: specify server port
+SSH Parameters:
+extra options pass to ssh, e.g.
+       -NfR REMOTE_PORT:127.0.0.1:22   # remote forward
+       -CfNgD PROXY_PORT               # SOCKS v5 proxy
 EOUSAGE
 }
 
@@ -33,6 +38,9 @@ shift $((${OPTIND} - 1))
 SERVER_NAME=${1}
 shift 1
 
+# Get the rest parameters
+SERVER_PARA=${@}
+
 # Get server user name and IP
 SERVER_META=`getServerMeta "d${THIS_FOLDER}" "n${SERVER_NAME}" "u${SERVER_USER}" "p${SERVER_PORT}"`
 if [ "${SERVER_META}" == "" ]; then
@@ -41,5 +49,5 @@ if [ "${SERVER_META}" == "" ]; then
 fi
 
 # Login to server
-ssh -p ${SERVER_META}
+ssh ${SERVER_PARA} -p ${SERVER_META}
 
