@@ -4,8 +4,8 @@ function usage()
 {
 cat << EOUSAGE
 Usage: ssh-server list
-       ssh-server add NICK_NAME USER IP [PORT]
-       ssh-server del NICK_NAME
+       ssh-server add SERVER_NAME USER IP [PORT]
+       ssh-server del SERVER_NAME
 EOUSAGE
 }
 

@@ -3,7 +3,7 @@
 function usage()
 {
     cat << EOUSAGE
-Usage: ssh-copy-id-to [options] NICK_NAME
+Usage: ssh-copy-id-to [options] SERVER_NAME
        -i FILE: specify ssh identity file
        -u USER: specify server user
        -p PORT: specify server port
