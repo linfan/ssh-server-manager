@@ -3,15 +3,16 @@
 function usage()
 {
     cat << EOUSAGE
-Usage: ssh-copy-id-to.sh [-i <IDENTITY_FILE>] [-u <SERVER_USER>] [-p <SERVER_PORT>] <SERVER_NAME>
-       -i specify ssh identity file
-       -u specify server user
-       -p specify server port
+Usage: ssh-copy-id-to [options] NICK_NAME
+       -i FILE: specify ssh identity file
+       -u USER: specify server user
+       -p PORT: specify server port
 EOUSAGE
 }
 
 # Name-to-ip mapping file
 THIS_FOLDER="${0%/*}"
+source "${THIS_FOLDER}/func/utility.func"
 IP_MAP_FILE="${THIS_FOLDER}/map-name-to-ip.sh"
 
 IDENTITY_FILE=`ls ${HOME}/.ssh/id_[rd]sa.pub | head -1`
@@ -38,25 +39,15 @@ SERVER_NAME=${1}
 shift 1
 
 # Get server user name and IP
-SERVER_META=`${IP_MAP_FILE} ${SERVER_NAME}`
-if [ "${SERVER_META}" = "" ]; then
+SERVER_META=`getServerMeta "d${THIS_FOLDER}" "n${SERVER_NAME}" "u${SERVER_USER}" "p${SERVER_PORT}"`
+if [ "${SERVER_META}" == "" ]; then
     echo "[ERROR] Unknown server or wrong parameters."
-    usage
     exit 1
-fi
-
-# If user or port specifed, modify SERVER_META
-if [ "${SERVER_USER}" != "" ]; then
-    SERVER_META="${SERVER_META%\ *} ${SERVER_USER}@${SERVER_META#*@}"
-fi
-if [ "${SERVER_PORT}" != "" ]; then
-    SERVER_META="${SERVER_PORT} ${SERVER_META#*\ }"
 fi
 
 # Check identify file exist and not empty
 if [ "${IDENTITY_FILE}" == "" ]; then
-    echo "[ERROR] Cannot find identity file."
-    usage
+    echo "[ERROR] Cannot find identity file, please specify use -i parameter."
     exit 1
 fi
 PUB_CREDENCE=`cat ${IDENTITY_FILE}`

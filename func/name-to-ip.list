@@ -1,8 +1,8 @@
 #!/bin/bash
 
 # BEGIN_OF_IP_LIST
-SERVER_server1_IP="22 demo@${SERVER1_IP}"
-SERVER_server2_IP="22 demo@${SERVER2_IP}"
+SERVER_demo1_IP="22 demo@10.0.0.1"
+SERVER_demo2_IP="22 demo@192.168.0.1"
 # END_OF_IP_LIST
 
 echo $(eval echo \${SERVER_${1}_IP})

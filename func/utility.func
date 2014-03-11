@@ -1,0 +1,26 @@
+#!/bin/bash
+
+function getServerMeta
+{
+    THIS_FOLDER=${1#d}
+    SERVER_NAME=${2#n}
+    SERVER_USER=${3#u}
+    SERVER_PORT=${4#p}
+    IP_MAP_FILE="${THIS_FOLDER}/func/name-to-ip.list"
+
+    # Get server user name and IP
+    SERVER_META=`${IP_MAP_FILE} ${SERVER_NAME}`
+
+    if [ "{SERVER_META}" != "" ]; then
+        # If user or port specifed, modify SERVER_META
+        if [ "${SERVER_USER}" != "" ]; then
+            SERVER_META="${SERVER_META%\ *} ${SERVER_USER}@${SERVER_META#*@}"
+        fi
+        if [ "${SERVER_PORT}" != "" ]; then
+            SERVER_META="${SERVER_PORT} ${SERVER_META#*\ }"
+        fi
+    fi
+
+    echo "${SERVER_META}"
+}
+

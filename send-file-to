@@ -3,17 +3,17 @@
 function usage()
 {
     cat << EOUSAGE
-Usage: send-file-to.sh [-f <FOLDER_TO_STORE>] [-u <SERVER_USER>] [-p <SERVER_PORT>] [-n] <SERVER_NAME> FILE1 [FILE2 ..]
-       -f specify server folder to store files
-       -u specify server user
-       -p specify server port
-       -n don't try remove files of same name on server before transfer
+Usage: send-file-to [options] NICK_NAME FILE1 [FILE2 ..]
+       -f FOLDER: specify server folder to store files
+       -u USER: specify server user
+       -p PORT: specify server port
+       -n : don't try remove files of same name on server before transfer
 EOUSAGE
 }
 
 # Name-to-ip mapping file
 THIS_FOLDER="${0%/*}"
-IP_MAP_FILE="${THIS_FOLDER}/map-name-to-ip.sh"
+source "${THIS_FOLDER}/func/utility.func"
 
 TARGET_PATH=""
 SERVER_USER=""
@@ -42,19 +42,10 @@ SERVER_NAME=${1}
 shift 1
 
 # Get server user name and IP
-SERVER_META=`${IP_MAP_FILE} ${SERVER_NAME}`
-if [ "${SERVER_META}" = "" ]; then
+SERVER_META=`getServerMeta "d${THIS_FOLDER}" "n${SERVER_NAME}" "u${SERVER_USER}" "p${SERVER_PORT}"`
+if [ "${SERVER_META}" == "" ]; then
     echo "[ERROR] Unknown server or wrong parameters."
-    usage
     exit 1
-fi
-
-# If user or port specifed, modify SERVER_META
-if [ "${SERVER_USER}" != "" ]; then
-    SERVER_META="${SERVER_META%\ *} ${SERVER_USER}@${SERVER_META#*@}"
-fi
-if [ "${SERVER_PORT}" != "" ]; then
-    SERVER_META="${SERVER_PORT} ${SERVER_META#*\ }"
 fi
 
 # Check parameters
