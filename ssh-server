@@ -32,6 +32,11 @@ function ssh-target-add
 
     # Check if record aleady exist
     if [ $(isNameExist "d${THIS_FOLDER}" "n${SERVER_NAME}") == "true" ]; then
+        COMFIRM_REPLACE='n'
+        read -p "Server ${SERVER_NAME} already exist, overwrite ? (N/Y) " COMFIRM_REPLACE
+        if [[ "${COMFIRM_REPLACE}" != "y" && "${COMFIRM_REPLACE}" != "Y" ]]; then 
+            exit 0
+        fi
         EXIST=1
         sed -i "/SERVER_${SERVER_NAME}_IP/d" "${IP_MAP_FILE}"
     fi
