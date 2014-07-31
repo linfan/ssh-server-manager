@@ -7,6 +7,7 @@ Usage: receive-file-from [options] SERVER_NAME FILE1 [FILE2 ..]
        -f FOLDER: specify local folder to receive files
        -u USER: specify server user
        -p PORT: specify server port
+       -l KB/S: specify bandwidth limit
        -d : delete files on server after transfer finish
 EOUSAGE
 }
@@ -18,9 +19,10 @@ source "${THIS_FOLDER}/func/utility.func"
 TARGET_PATH="./"
 SERVER_USER=""
 SERVER_PORT=""
+declare -i BANDWIDTH_LIMIT=0
 declare -i DELETE_AFTER_CP=0
 
-while getopts ":f:u:p:d" opt
+while getopts ":f:u:p:l:d" opt
 do
     case ${opt} in
         f ) TARGET_PATH="${OPTARG}"
@@ -28,6 +30,8 @@ do
         u ) SERVER_USER="${OPTARG}"
             ;;
         p ) SERVER_PORT="${OPTARG}"
+            ;;
+        l ) BANDWIDTH_LIMIT="${OPTARG}"
             ;;
         d ) DELETE_AFTER_CP=1
             ;;
@@ -65,9 +69,15 @@ done
 # If TARGET_PATH is not end with a '/', attach one
 TARGET_PATH="${TARGET_PATH%/}/"
 
+# If set bandwidth limit, apply it
+if [ ${BANDWIDTH_LIMIT} != 0 ]; then
+    BANDWIDTH_LIMIT=${BANDWIDTH_LIMIT}*8
+    BANDWIDTH_PARA="-l ${BANDWIDTH_LIMIT}"
+fi
+
 # Receive file from server
 echo ">> Receiving files from server ${SERVER_NAME} .."
-scp -P ${FILE_LIST} ${TARGET_PATH}
+scp ${BANDWIDTH_PARA} -P ${FILE_LIST} ${TARGET_PATH}
 
 # Delete tranfered files from server
 if [ ${DELETE_AFTER_CP} -eq 1 ]; then

@@ -18,9 +18,10 @@ source "${THIS_FOLDER}/func/utility.func"
 TARGET_PATH=""
 SERVER_USER=""
 SERVER_PORT=""
+declare -i BANDWIDTH_LIMIT=0
 declare -i DELETE_BEFORE_CP=1
 
-while getopts ":f:u:p:n" opt
+while getopts ":f:u:p:l:n" opt
 do
     case ${opt} in
         f ) TARGET_PATH="${OPTARG}"
@@ -28,6 +29,8 @@ do
         u ) SERVER_USER="${OPTARG}"
             ;;
         p ) SERVER_PORT="${OPTARG}"
+            ;;
+        l ) BANDWIDTH_LIMIT="${OPTARG}"
             ;;
         n ) DELETE_BEFORE_CP=0
             ;;
@@ -76,6 +79,12 @@ for FILE in $@; do
     FILE_SEND_LIST="${FILE} ${FILE_SEND_LIST}"
 done
 
+# If set bandwidth limit, apply it
+if [ ${BANDWIDTH_LIMIT} != 0 ]; then
+    BANDWIDTH_LIMIT=${BANDWIDTH_LIMIT}*8
+    BANDWIDTH_PARA="-l ${BANDWIDTH_LIMIT}"
+fi
+
 # Delete exist file from server before transfer
 if [ ${DELETE_BEFORE_CP} -eq 1 ]; then
     echo ">> Deleting files before send.. ${FILE_DEL_LIST}"
@@ -85,5 +94,5 @@ fi
 # Send file to server
 SERVER_PORT="${SERVER_META%%\ *}"
 echo ">> Sending files to server ${SERVER_NAME} .."
-scp -P ${SERVER_PORT} ${FILE_SEND_LIST} ${SERVER_META#*\ }:${TARGET_PATH}
+scp ${BANDWIDTH_PARA} -P ${SERVER_PORT} ${FILE_SEND_LIST} ${SERVER_META#*\ }:${TARGET_PATH}
 
