@@ -6,6 +6,7 @@ cat << EOUSAGE
 Usage: ssh-server list
        ssh-server add SERVER_NAME USER IP [PORT]
        ssh-server del SERVER_NAME
+       ssh-server reset SERVER_NAME
 EOUSAGE
 }
 
@@ -78,6 +79,16 @@ function ssh-target-remove
     fi
 }
 
+# Remove the server from ${HOME}/.ssh/known_hosts file
+function ssh-target-reset
+{
+    SERVER_NAME=${1}
+    KNOWN_HOSTS="${HOME}/.ssh/known_hosts"
+    SERVER_IP=`grep "SERVER_${SERVER_NAME}_IP" "${IP_MAP_FILE}" | sed 's/.*@\([^"]*\).*/\1/g'`
+    sed -i "/${SERVER_IP}/d" ${KNOWN_HOSTS}
+    echo "[Done] Server ${SERVER_NAME} removed from known_hosts."
+}
+
 # List all server record
 function ssh-target-list
 {
@@ -96,6 +107,9 @@ case ${1} in
         ssh-target-remove ${*}
         ;;
     list) ssh-target-list
+        ;;
+    reset) shift
+        ssh-target-reset ${*}
         ;;
     *) usage
         ;;
