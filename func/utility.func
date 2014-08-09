@@ -1,5 +1,12 @@
 #!/bin/bash
 
+HOST_TYPE=`uname`
+if [ "${HOST_TYPE}" == "Darwin" ]; then
+    shopt -s expand_aliases
+    alias grep='ggrep'
+    alias sed='gsed'
+fi
+
 function getServerMeta
 {
     THIS_FOLDER=${1#d}
