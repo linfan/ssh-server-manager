@@ -8,6 +8,7 @@ Usage: receive-file-from [options] SERVER_NAME FILE1 [FILE2 ..]
        -u USER: specify server user
        -p PORT: specify server port
        -l KB/S: specify bandwidth limit
+       -o : overwrite exist file on local
        -d : delete files on server after transfer finish
 EOUSAGE
 }
@@ -20,9 +21,10 @@ TARGET_PATH="./"
 SERVER_USER=""
 SERVER_PORT=""
 declare -i BANDWIDTH_LIMIT=0
+declare -i OVERWRITE_FILE=0
 declare -i DELETE_AFTER_CP=0
 
-while getopts ":f:u:p:l:d" opt
+while getopts ":f:u:p:l:od" opt
 do
     case ${opt} in
         f ) TARGET_PATH="${OPTARG}"
@@ -32,6 +34,8 @@ do
         p ) SERVER_PORT="${OPTARG}"
             ;;
         l ) BANDWIDTH_LIMIT="${OPTARG}"
+            ;;
+        o ) OVERWRITE_FILE=1
             ;;
         d ) DELETE_AFTER_CP=1
             ;;
@@ -58,16 +62,23 @@ if [ ${#} -eq 0 ]; then
     exit 1
 fi
 
-# Generate file list
-FILE_DEL_LIST=""
-FILE_LIST="${SERVER_META%%\ *}" # put server port first
-for FILE in $@; do
-    FILE_DEL_LIST="${FILE} ${FILE_DEL_LIST}"
-    FILE_LIST="${FILE_LIST} ${SERVER_META#*\ }:${FILE}"
-done
-
 # If TARGET_PATH is not end with a '/', attach one
 TARGET_PATH="${TARGET_PATH%/}/"
+
+# Generate file list
+FILE_DEL_LIST=""
+FILE_LIST=""
+for FILE in $@; do
+    if [[ ${OVERWRITE_FILE} -eq 0 && -e ${TARGET_PATH}${FILE##*/} ]]; then
+        echo "Skip [ ${FILE} ], file already exist."
+    else
+        if [ "${FILE_LIST}" == "" ]; then
+            FILE_LIST="${SERVER_META%%\ *}" # put server port first
+        fi
+        FILE_DEL_LIST="${FILE} ${FILE_DEL_LIST}"
+        FILE_LIST="${FILE_LIST} ${SERVER_META#*\ }:${FILE}"
+    fi
+done
 
 # If set bandwidth limit, apply it
 if [ ${BANDWIDTH_LIMIT} != 0 ]; then
@@ -77,10 +88,13 @@ fi
 
 # Receive file from server
 echo ">> Receiving files from server ${SERVER_NAME} .."
-scp ${BANDWIDTH_PARA} -P ${FILE_LIST} ${TARGET_PATH}
+if [ "${FILE_LIST}" != "" ]; then
+    echo "scp ${BANDWIDTH_PARA} -P ${FILE_LIST} ${TARGET_PATH}"
+    scp ${BANDWIDTH_PARA} -P ${FILE_LIST} ${TARGET_PATH}
+fi
 
 # Delete tranfered files from server
-if [ ${DELETE_AFTER_CP} -eq 1 ]; then
+if [[ ${DELETE_AFTER_CP} -eq 1 && "${FILE_DEL_LIST}" != "" ]]; then
     echo ">> Deleting files after received.. ${FILE_DEL_LIST}"
     ssh -p ${SERVER_META} "rm -f ${FILE_DEL_LIST}"
 fi
