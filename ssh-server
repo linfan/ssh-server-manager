@@ -4,7 +4,7 @@ function usage()
 {
 cat << EOUSAGE
 Usage: ssh-server list
-       ssh-server add SERVER_NAME USER IP [PORT]
+       ssh-server add SERVER_NAME USER IP [PORT] [PRIVATE_KEY_FILE]
        ssh-server del SERVER_NAME
        ssh-server reset SERVER_NAME
 EOUSAGE
@@ -22,14 +22,21 @@ function ssh-target-add
         usage
         exit 1
     fi
+    declare -i EXIST=0
     SERVER_NAME=${1}
     SERVER_USER=${2}
     SERVER_IP=${3}
     SERVER_PORT=${4}
+    PRIVATE_KEY_FILE=${5}
+
     if [ "${SERVER_PORT}" == "" ]; then
         SERVER_PORT="22"
     fi
-    declare -i EXIST=0
+ 
+    if [ "${SERVER_PORT}" != "" ]; then
+        WITH_KEY="-i ${PRIVATE_KEY_FILE} "
+        USING_KEY="(using ${PRIVATE_KEY_FILE}) "
+    fi
 
     # Check if record aleady exist
     if [ $(isNameExist "d${THIS_FOLDER}" "n${SERVER_NAME}") == "true" ]; then
@@ -43,15 +50,15 @@ function ssh-target-add
     fi
 
     # Add record
-    sed -i '/BEGIN_OF_IP_LIST/a'"SERVER_${SERVER_NAME}_IP=\"${SERVER_PORT} ${SERVER_USER}@${SERVER_IP}\"" "${IP_MAP_FILE}"
+    sed -i '/BEGIN_OF_IP_LIST/a'"SERVER_${SERVER_NAME}_IP=\"${SERVER_PORT} ${WITH_KEY}${SERVER_USER}@${SERVER_IP}\"" "${IP_MAP_FILE}"
 
     # Check result
     if [ $(isNameExist "d${THIS_FOLDER}" "n${SERVER_NAME}") == "false" ]; then
         echo "[Error] Server add failed!"
     elif [ ${EXIST} -eq 1 ]; then
-        echo "[Done] Server ${SERVER_NAME} modified => [${SERVER_USER}] ${SERVER_IP} : ${SERVER_PORT} succeeful."
+        echo "[Done] Server ${SERVER_NAME} modified => [${SERVER_USER}] ${SERVER_IP} : ${SERVER_PORT} ${USING_KEY}succeeful."
     else
-        echo "[Done] Server ${SERVER_NAME} => [${SERVER_USER}] ${SERVER_IP} : ${SERVER_PORT} added successful."
+        echo "[Done] Server ${SERVER_NAME} => [${SERVER_USER}] ${SERVER_IP} : ${SERVER_PORT} ${USING_KEY}added successful."
     fi
 }
 
