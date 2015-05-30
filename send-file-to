@@ -60,7 +60,14 @@ fi
 # If TARGET_PATH not specified, set it to user's home folder
 if [ "${TARGET_PATH}" == "" ]; then
     SERVER_USER_PORT="${SERVER_META#*\ }"
-    SERVER_USER="${SERVER_USER_PORT%@*}"
+    SERVER_IP="${SERVER_META##*@}"
+    USE_PUB_KEY=$(echo "${SERVER_USER_PORT}" | grep "\-i ")
+    if [ "${USE_PUB_KEY}" != "" ]; then
+        SERVER_USER=$(echo "${SERVER_USER_PORT}" | sed 's#^.* \([^@]*\)@.*$#\1#g')
+        PUBLIC_KEY=$(echo "${SERVER_USER_PORT}" | sed 's#^.*\(-i [^ ]*\) .*$#\1#g')
+    else
+        SERVER_USER="${SERVER_USER_PORT%@*}"
+    fi
     if [ "${SERVER_USER}" == "root" ]; then
         TARGET_PATH="/root/"
     else
@@ -94,5 +101,5 @@ fi
 # Send file to server
 SERVER_PORT="${SERVER_META%%\ *}"
 echo ">> Sending files to server ${SERVER_NAME} .."
-scp ${BANDWIDTH_PARA} -P ${SERVER_PORT} ${FILE_SEND_LIST} ${SERVER_META#*\ }:${TARGET_PATH}
+scp ${BANDWIDTH_PARA} ${PUBLIC_KEY} -P ${SERVER_PORT} ${FILE_SEND_LIST} ${SERVER_USER}@${SERVER_IP}:${TARGET_PATH}
 
