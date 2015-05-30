@@ -3,10 +3,12 @@
 function usage()
 {
 cat << EOUSAGE
-Usage: ssh-server list
-       ssh-server add SERVER_NAME USER IP [PORT] [PRIVATE_KEY_FILE]
-       ssh-server del SERVER_NAME
-       ssh-server reset SERVER_NAME
+[ Usage ]
+List all server records:                ssh-server 
+List specified server record:           ssh-server list SERVER_NAME
+Add a server to list:                   ssh-server add SERVER_NAME USER IP [PORT] [PRIVATE_KEY_FILE]
+Delete a server from list:              ssh-server del SERVER_NAME
+Remove a server from known_hosts file:  ssh-server reset SERVER_NAME
 EOUSAGE
 }
 
@@ -99,12 +101,17 @@ function ssh-target-reset
 # List all server record
 function ssh-target-list
 {
-    grep -P "SERVER_[^_]+_IP=" "${IP_MAP_FILE}" | sed -r -e 's/SERVER_([^_]+)_IP=([^ ]+) ([^@]+)@(.+)/\1 \t=> [\3] \t\4 \t: \2/g' -e 's/"//g'
+    SERVER_NAME=${1}
+    if [ "${SERVER_NAME}" != "" ]; then
+        grep -P "SERVER_[^_]+_IP=" "${IP_MAP_FILE}" | sed -r -e 's/SERVER_([^_]+)_IP=([^ ]+) ([^@]+)@(.+)/\1 \t=> [\3] \t\4 \t: \2/g' -e 's/"//g' | grep "\b${SERVER_NAME}\b"
+    else
+        grep -P "SERVER_[^_]+_IP=" "${IP_MAP_FILE}" | sed -r -e 's/SERVER_([^_]+)_IP=([^ ]+) ([^@]+)@(.+)/\1 \t=> [\3] \t\4 \t: \2/g' -e 's/"//g'
+    fi
 }
 
 if [ ${#} -lt 1 ]; then
-    usage
-    exit 1
+    ssh-target-list
+    exit 0
 fi
 case ${1} in
     add|modify) shift
@@ -113,7 +120,8 @@ case ${1} in
     remove|delete|del) shift
         ssh-target-remove ${*}
         ;;
-    list) ssh-target-list
+    list) shift
+        ssh-target-list ${*}
         ;;
     reset) shift
         ssh-target-reset ${*}
