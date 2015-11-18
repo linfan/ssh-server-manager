@@ -49,5 +49,5 @@ if [ "${SERVER_META}" == "" ]; then
 fi
 
 # Login to server
-ssh ${SERVER_PARA} -p ${SERVER_META}
+ssh -p ${SERVER_META} ${SERVER_PARA}
 
